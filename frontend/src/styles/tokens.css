@@ -1,0 +1,11 @@
+:root {
+  --color-bg: #0a0a0a;
+  --color-surface: #111111;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-primary: #f0c040;
+  --color-secondary: #cc2200;
+  --color-text: #e8e4dc;
+  --color-text-muted: #888880;
+  --font-heading: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'JetBrains Mono', ui-monospace, monospace;
+}
