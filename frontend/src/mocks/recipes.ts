@@ -189,3 +189,55 @@ export function getMockRecipe(id: number): Recipe | undefined {
 export function mockDelay(ms = 600): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
+
+export interface MockRecipePayload {
+  title: string
+  description: string
+  ingredients: string
+  preparationSteps: string
+  videoUrl: string
+  thumbnailUrl: string
+}
+
+function splitLines(value: string): string[] {
+  if (!value.trim()) return []
+  return value
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
+export function createMockRecipe(payload: MockRecipePayload): Recipe {
+  const id = Math.max(0, ...MOCK_RECIPES.map((r) => r.id)) + 1
+  const recipe: Recipe = {
+    id,
+    title: payload.title,
+    description: payload.description,
+    ingredients: splitLines(payload.ingredients),
+    steps: splitLines(payload.preparationSteps),
+    videoUrl: payload.videoUrl,
+    thumbnailUrl: payload.thumbnailUrl,
+    createdAt: new Date().toISOString(),
+  }
+  MOCK_RECIPES.unshift(recipe)
+  return recipe
+}
+
+export function updateMockRecipe(id: number, payload: MockRecipePayload): Recipe {
+  const index = MOCK_RECIPES.findIndex((r) => r.id === id)
+  if (index === -1) {
+    throw new Error('Receita não encontrada.')
+  }
+  const existing = MOCK_RECIPES[index]
+  const updated: Recipe = {
+    ...existing,
+    title: payload.title,
+    description: payload.description,
+    ingredients: splitLines(payload.ingredients),
+    steps: splitLines(payload.preparationSteps),
+    videoUrl: payload.videoUrl,
+    thumbnailUrl: payload.thumbnailUrl,
+  }
+  MOCK_RECIPES[index] = updated
+  return updated
+}

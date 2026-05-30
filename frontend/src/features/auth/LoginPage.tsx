@@ -1,19 +1,38 @@
-import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState, type FormEvent } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
+import { useAuth } from '../../hooks/useAuth'
+import { toastFromError, toastSuccess } from '../../lib/toast'
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { login, isAuthenticated } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
 
+  const from = (location.state as { from?: string } | null)?.from ?? '/dashboard'
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true })
+    }
+  }, [isAuthenticated, from, navigate])
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 500))
-    navigate('/dashboard')
+    try {
+      await login(email, password)
+      toastSuccess('Login realizado com sucesso.')
+      navigate(from, { replace: true })
+    } catch (err) {
+      toastFromError(err, 'E-mail ou senha inválidos.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

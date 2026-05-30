@@ -1,5 +1,6 @@
 import type { MouseEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { toastConfirm } from '../../lib/toast'
 import type { RecipeSummary } from '../../types/recipe'
 
 interface RecipeCardProps {
@@ -16,10 +17,13 @@ function formatDate(dateStr: string): string {
 }
 
 export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
-  function handleDelete(e: MouseEvent) {
+  async function handleDelete(e: MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    if (window.confirm(`Excluir "${recipe.title}"?`)) {
+    const confirmed = await toastConfirm({
+      message: `Deseja excluir "${recipe.title}"? Esta ação não pode ser desfeita.`,
+    })
+    if (confirmed) {
       onDelete(recipe.id)
     }
   }

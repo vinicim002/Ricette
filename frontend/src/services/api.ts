@@ -100,8 +100,54 @@ export const api = {
     )
   },
 
-  getRecipe: (id: number) => request<Recipe>(`/recipes/${id}`),
+  getRecipe: (id: number) => request<RecipeApiDto>(`/recipes/${id}`),
+
+  createRecipe: (body: RecipePayload) =>
+    request<RecipeApiDto>('/recipes', { method: 'POST', body: { ...body } }),
+
+  updateRecipe: (id: number, body: RecipePayload) =>
+    request<RecipeApiDto>(`/recipes/${id}`, { method: 'PUT', body: { ...body } }),
 
   deleteRecipe: (id: number) =>
     request<void>(`/recipes/${id}`, { method: 'DELETE' }),
+}
+
+export interface RecipePayload {
+  title: string
+  description: string
+  ingredients: string
+  preparationSteps: string
+  videoUrl: string
+  thumbnailUrl: string
+}
+
+interface RecipeApiDto {
+  id: number
+  title: string
+  description: string
+  ingredients: string
+  preparationSteps: string
+  videoUrl: string
+  thumbnailUrl: string
+  createdAt: string
+  updatedAt?: string
+}
+
+export function mapRecipeFromApi(dto: RecipeApiDto): Recipe {
+  const split = (value: string) =>
+    value
+      ?.split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean) ?? []
+
+  return {
+    id: dto.id,
+    title: dto.title,
+    description: dto.description ?? '',
+    ingredients: split(dto.ingredients),
+    steps: split(dto.preparationSteps),
+    videoUrl: dto.videoUrl ?? '',
+    thumbnailUrl: dto.thumbnailUrl ?? '',
+    createdAt: dto.createdAt,
+  }
 }

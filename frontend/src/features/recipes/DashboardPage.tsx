@@ -4,16 +4,18 @@ import { Fab } from '../../components/ui/Fab'
 import { Input } from '../../components/ui/Input'
 import { RecipeCardSkeleton } from '../../components/ui/Skeleton'
 import { useRecipes } from '../../hooks/useRecipes'
+import { toastFromError, toastSuccess } from '../../lib/toast'
 import { RecipeCard } from './RecipeCard'
 
 export function DashboardPage() {
   const { recipes, loading, error, search, setSearch, refetch, deleteRecipe } = useRecipes()
 
-  async function handleDelete(id: number) {
+  async function handleDelete(id: number, title: string) {
     try {
       await deleteRecipe(id)
+      toastSuccess(`"${title}" foi excluída.`)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Erro ao excluir receita.')
+      toastFromError(err, 'Erro ao excluir receita.')
     }
   }
 
@@ -85,7 +87,10 @@ export function DashboardPage() {
                 className="animate-fade-in-up"
                 style={{ animationDelay: `${Math.min(index * 60, 360)}ms` }}
               >
-                <RecipeCard recipe={recipe} onDelete={handleDelete} />
+                <RecipeCard
+                  recipe={recipe}
+                  onDelete={(id) => handleDelete(id, recipe.title)}
+                />
               </div>
             ))}
           </div>

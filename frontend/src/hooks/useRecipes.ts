@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { toastError } from '../lib/toast'
 import { getMockRecipe, getMockRecipes, mockDelay } from '../mocks/recipes'
 import type { Recipe, RecipeSummary } from '../types/recipe'
 
@@ -25,7 +26,9 @@ export function useRecipes(): UseRecipesResult {
       await mockDelay()
       setRecipes(getMockRecipes(search))
     } catch {
-      setError('Erro ao carregar receitas.')
+      const message = 'Erro ao carregar receitas.'
+      setError(message)
+      toastError(message)
     } finally {
       setLoading(false)
     }
@@ -59,12 +62,25 @@ interface UseRecipeResult {
   refetch: () => void
 }
 
+function isValidRecipeId(id: number): boolean {
+  return Number.isFinite(id) && id > 0
+}
+
 export function useRecipe(id: number): UseRecipeResult {
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const refetch = useCallback(async () => {
+    if (!isValidRecipeId(id)) {
+      const message = 'Receita inválida.'
+      setError(message)
+      toastError(message)
+      setRecipe(null)
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     setError(null)
     await mockDelay()
@@ -72,7 +88,9 @@ export function useRecipe(id: number): UseRecipeResult {
     if (data) {
       setRecipe(data)
     } else {
-      setError('Receita não encontrada.')
+      const message = 'Receita não encontrada.'
+      setError(message)
+      toastError(message)
       setRecipe(null)
     }
     setLoading(false)
@@ -82,6 +100,15 @@ export function useRecipe(id: number): UseRecipeResult {
     let cancelled = false
 
     async function loadRecipe() {
+      if (!isValidRecipeId(id)) {
+        const message = 'Receita inválida.'
+        setError(message)
+        toastError(message)
+        setRecipe(null)
+        setLoading(false)
+        return
+      }
+
       setLoading(true)
       setError(null)
       await mockDelay()
@@ -90,7 +117,9 @@ export function useRecipe(id: number): UseRecipeResult {
       if (data) {
         setRecipe(data)
       } else {
-        setError('Receita não encontrada.')
+        const message = 'Receita não encontrada.'
+        setError(message)
+        toastError(message)
         setRecipe(null)
       }
       setLoading(false)

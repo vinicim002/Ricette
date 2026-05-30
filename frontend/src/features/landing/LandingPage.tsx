@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { useLandingGsap } from './useLandingGsap'
 
 const FEATURES = [
   {
@@ -90,20 +92,33 @@ const FAQ = [
 ]
 
 export function LandingPage() {
-  return (
-    <div className="relative overflow-hidden">
-      <div
-        className="pointer-events-none fixed inset-0 opacity-30"
-        aria-hidden="true"
-        style={{
-          background:
-            'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(240,192,64,0.12) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 90% 80%, rgba(204,34,0,0.06) 0%, transparent 50%)',
-        }}
-      />
+  const rootRef = useRef<HTMLDivElement>(null)
+  useLandingGsap(rootRef)
 
-      {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-6 md:px-12 md:py-8">
-        <span className="font-heading text-2xl text-primary md:text-3xl">Ricette</span>
+  return (
+    <div ref={rootRef} className="relative overflow-hidden">
+      {/* Container fixo; parallax só no filho (maior) para não abrir gap no viewport */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+        aria-hidden="true"
+      >
+        <div
+          data-landing-bg
+          className="absolute left-0 right-0 top-[-12%] h-[125%] opacity-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(240,192,64,0.12) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 90% 80%, rgba(204,34,0,0.06) 0%, transparent 50%)',
+          }}
+        />
+      </div>
+
+      <header
+        data-landing-header
+        className="relative z-10 flex items-center justify-between px-6 py-6 md:px-12 md:py-8"
+      >
+        <span className="font-heading text-2xl text-primary transition-transform duration-300 hover:scale-[1.02] md:text-3xl">
+          Ricette
+        </span>
         <nav className="flex items-center gap-6">
           <a
             href="#funcionalidades"
@@ -126,70 +141,93 @@ export function LandingPage() {
         </nav>
       </header>
 
-      {/* Hero */}
       <section className="relative z-10 px-6 pb-20 pt-12 text-center md:px-12 md:pb-32 md:pt-20">
-        <p className="animate-fade-in-up mb-6 text-xs uppercase tracking-[0.3em] text-text-muted">
+        <p
+          data-hero-item
+          className="mb-6 text-xs uppercase tracking-[0.3em] text-text-muted"
+        >
           La tua cucina, in video
         </p>
 
-        <h1 className="animate-fade-in-up animate-delay-100 mx-auto max-w-5xl font-heading text-5xl leading-[1.05] text-text md:text-7xl lg:text-8xl">
+        <h1
+          data-hero-item
+          className="mx-auto max-w-5xl font-heading text-5xl leading-[1.05] text-text md:text-7xl lg:text-8xl"
+        >
           Suas receitas em vídeo,{' '}
-          <em className="not-italic text-primary">organizadas</em> como uma revista italiana
+          <em data-hero-highlight className="not-italic text-primary">
+            organizadas
+          </em>{' '}
+          como uma revista italiana
         </h1>
 
-        <p className="animate-fade-in-up animate-delay-200 mx-auto mt-8 max-w-2xl text-sm leading-relaxed text-text-muted md:text-base">
+        <p
+          data-hero-item
+          className="mx-auto mt-8 max-w-2xl text-sm leading-relaxed text-text-muted md:text-base"
+        >
           Grave, catalogue e reviva cada preparo. Um arquivo pessoal de gastronomia — elegante,
           minimalista e sempre à mão. Do risotto da nonna ao experimento de ontem à noite.
         </p>
 
-        <div className="animate-fade-in-up animate-delay-300 mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <div
+          data-hero-item
+          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+        >
           <Link
             to="/login"
-            className="inline-flex items-center justify-center rounded-sm bg-primary px-8 py-3 font-body text-xs uppercase tracking-widest text-bg transition-all hover:bg-primary/90 hover:shadow-[0_0_32px_rgba(240,192,64,0.25)]"
+            className="inline-flex items-center justify-center rounded-sm bg-primary px-8 py-3 font-body text-xs uppercase tracking-widest text-bg transition-all hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-[0_0_32px_rgba(240,192,64,0.25)] active:scale-[0.98]"
           >
             Começar agora
           </Link>
           <Link
             to="/dashboard"
-            className="inline-flex items-center justify-center rounded-sm border border-border px-8 py-3 font-body text-xs uppercase tracking-widest text-text-muted transition-all hover:border-primary/30 hover:text-primary"
+            className="inline-flex items-center justify-center rounded-sm border border-border px-8 py-3 font-body text-xs uppercase tracking-widest text-text-muted transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:text-primary active:scale-[0.98]"
           >
             Ver demonstração
           </Link>
         </div>
 
-        {/* Stats strip */}
-        <div className="animate-fade-in-up animate-delay-300 mx-auto mt-20 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-sm border border-border bg-border md:grid-cols-4">
+        <div className="mx-auto mt-20 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-sm border border-border bg-border md:grid-cols-4">
           {[
             { value: '∞', label: 'Receitas' },
             { value: 'HD', label: 'Vídeos' },
             { value: '100%', label: 'Pessoal' },
             { value: '24/7', label: 'Acesso' },
           ].map((stat) => (
-            <div key={stat.label} className="bg-surface px-4 py-6 md:py-8">
+            <div key={stat.label} data-hero-stat className="bg-surface px-4 py-6 md:py-8">
               <p className="font-heading text-2xl text-primary md:text-3xl">{stat.value}</p>
-              <p className="mt-1 text-[10px] uppercase tracking-widest text-text-muted">{stat.label}</p>
+              <p className="mt-1 text-[10px] uppercase tracking-widest text-text-muted">
+                {stat.label}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Quote / editorial */}
-      <section className="relative z-10 border-y border-border bg-surface/40 px-6 py-16 md:px-12 md:py-24">
+      <section
+        data-section-quote
+        className="relative z-10 border-y border-border bg-surface/40 px-6 py-16 md:px-12 md:py-24"
+      >
         <blockquote className="mx-auto max-w-3xl text-center">
-          <p className="font-heading text-2xl leading-snug text-text md:text-4xl lg:text-5xl">
+          <p
+            data-reveal
+            className="font-heading text-2xl leading-snug text-text md:text-4xl lg:text-5xl"
+          >
             &ldquo;In cucina, o tempo para. Cada receita é uma memória que merece ser{' '}
             <span className="text-primary">guardada</span>.&rdquo;
           </p>
-          <footer className="mt-6 text-xs uppercase tracking-[0.25em] text-text-muted">
+          <footer data-reveal className="mt-6 text-xs uppercase tracking-[0.25em] text-text-muted">
             — Filosofia Ricette
           </footer>
         </blockquote>
       </section>
 
-      {/* Features */}
-      <section id="funcionalidades" className="relative z-10 px-6 py-20 md:px-12 md:py-28">
+      <section
+        id="funcionalidades"
+        data-section-features
+        className="relative z-10 px-6 py-20 md:px-12 md:py-28"
+      >
         <div className="mx-auto max-w-6xl">
-          <div className="mb-14 text-center md:mb-20">
+          <div data-section-head className="mb-14 text-center md:mb-20">
             <p className="text-xs uppercase tracking-[0.3em] text-text-muted">Funcionalidades</p>
             <h2 className="mt-3 font-heading text-4xl text-text md:text-5xl">
               Tudo que você precisa, nada que atrapalhe
@@ -200,13 +238,16 @@ export function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {FEATURES.map((feature, index) => (
+            {FEATURES.map((feature) => (
               <article
                 key={feature.title}
-                className="animate-fade-in-up group rounded-sm border border-border bg-surface/60 p-8 transition-all duration-300 hover:border-primary/25 hover:bg-surface"
-                style={{ animationDelay: `${index * 80}ms` }}
+                data-feature-card
+                className="group cursor-default rounded-sm border border-border bg-surface/60 p-8 transition-colors duration-300 hover:border-primary/25 hover:bg-surface"
               >
-                <span className="font-heading text-3xl text-primary/60 transition-colors group-hover:text-primary">
+                <span
+                  data-feature-icon
+                  className="inline-block font-heading text-3xl text-primary/60 transition-colors group-hover:text-primary"
+                >
                   {feature.icon}
                 </span>
                 <h3 className="mt-4 font-heading text-2xl text-text">{feature.title}</h3>
@@ -217,13 +258,13 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* How it works */}
       <section
         id="como-funciona"
+        data-section-steps
         className="relative z-10 border-t border-border bg-surface/30 px-6 py-20 md:px-12 md:py-28"
       >
         <div className="mx-auto max-w-6xl">
-          <div className="mb-14 text-center md:mb-20">
+          <div data-section-head className="mb-14 text-center md:mb-20">
             <p className="text-xs uppercase tracking-[0.3em] text-text-muted">Como funciona</p>
             <h2 className="mt-3 font-heading text-4xl text-text md:text-5xl">
               Três passos. Zero complicação.
@@ -232,14 +273,18 @@ export function LandingPage() {
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {STEPS.map((step, index) => (
-              <div key={step.number} className="relative text-center md:text-left">
+              <div key={step.number} data-step className="relative text-center md:text-left">
                 {index < STEPS.length - 1 && (
                   <div
-                    className="absolute left-1/2 top-8 hidden h-px w-full bg-border md:block"
+                    data-step-line
+                    className="absolute left-1/2 top-8 hidden h-px w-full origin-left bg-border md:block"
                     aria-hidden="true"
                   />
                 )}
-                <span className="relative inline-flex size-16 items-center justify-center rounded-sm border border-primary/30 bg-primary/10 font-heading text-2xl text-primary">
+                <span
+                  data-step-num
+                  className="relative inline-flex size-16 items-center justify-center rounded-sm border border-primary/30 bg-primary/10 font-heading text-2xl text-primary"
+                >
                   {step.number}
                 </span>
                 <h3 className="mt-6 font-heading text-2xl text-text">{step.title}</h3>
@@ -250,10 +295,12 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Showcase */}
-      <section className="relative z-10 px-6 py-20 md:px-12 md:py-28">
+      <section data-section-showcase className="relative z-10 px-6 py-20 md:px-12 md:py-28">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-14 flex flex-col items-start justify-between gap-6 md:mb-16 md:flex-row md:items-end">
+          <div
+            data-section-head
+            className="mb-14 flex flex-col items-start justify-between gap-6 md:mb-16 md:flex-row md:items-end"
+          >
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-text-muted">Acervo</p>
               <h2 className="mt-3 font-heading text-4xl text-text md:text-5xl">
@@ -269,39 +316,42 @@ export function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-            {SHOWCASE.map((item, index) => (
-              <Link
-                key={item.id}
-                to={`/recipes/${item.id}`}
-                className="animate-fade-in-up group overflow-hidden rounded-sm border border-border bg-surface transition-all duration-300 hover:border-primary/25 hover:shadow-[0_0_40px_rgba(240,192,64,0.06)]"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  <span className="absolute left-3 top-3 rounded-sm bg-bg/80 px-2 py-1 text-[10px] uppercase tracking-widest text-primary backdrop-blur-sm">
-                    {item.tag}
-                  </span>
-                </div>
-                <div className="p-5">
-                  <h3 className="font-heading text-xl text-text transition-colors group-hover:text-primary">
-                    {item.title}
-                  </h3>
-                </div>
-              </Link>
+            {SHOWCASE.map((item) => (
+              <div key={item.id} data-showcase-card>
+                <Link
+                  to={`/recipes/${item.id}`}
+                  className="group block overflow-hidden rounded-sm border border-border bg-surface transition-shadow duration-300 hover:border-primary/25 hover:shadow-[0_0_40px_rgba(240,192,64,0.06)]"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img
+                      data-showcase-img
+                      src={item.image}
+                      alt={item.title}
+                      className="size-full scale-105 object-cover transition-transform duration-500 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                    <span className="absolute left-3 top-3 rounded-sm bg-bg/80 px-2 py-1 text-[10px] uppercase tracking-widest text-primary backdrop-blur-sm">
+                      {item.tag}
+                    </span>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-heading text-xl text-text transition-colors group-hover:text-primary">
+                      {item.title}
+                    </h3>
+                  </div>
+                </Link>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Split banner */}
-      <section className="relative z-10 border-y border-border">
+      <section data-section-split className="relative z-10 border-y border-border">
         <div className="mx-auto grid max-w-6xl grid-cols-1 md:grid-cols-2">
-          <div className="flex flex-col justify-center px-6 py-16 md:px-12 md:py-24">
+          <div
+            data-split-left
+            className="flex flex-col justify-center px-6 py-16 md:px-12 md:py-24"
+          >
             <p className="text-xs uppercase tracking-[0.3em] text-secondary">Per la cucina</p>
             <h2 className="mt-4 font-heading text-3xl text-text md:text-4xl">
               Projetado para a cozinha real
@@ -313,7 +363,11 @@ export function LandingPage() {
             <ul className="mt-8 space-y-3">
               {['Mobile-first', 'Player nativo HTML5', 'Listas de ingredientes claras'].map(
                 (item) => (
-                  <li key={item} className="flex items-center gap-3 text-sm text-text-muted">
+                  <li
+                    key={item}
+                    data-split-item
+                    className="flex items-center gap-3 text-sm text-text-muted"
+                  >
                     <span className="text-primary" aria-hidden="true">
                       ✓
                     </span>
@@ -324,7 +378,9 @@ export function LandingPage() {
             </ul>
           </div>
           <div
-            className="relative min-h-[320px] bg-cover bg-center md:min-h-0"
+            data-split-right
+            data-split-img
+            className="relative min-h-[320px] bg-[length:120%] bg-[position:50%_50%] bg-no-repeat md:min-h-0"
             style={{
               backgroundImage:
                 'url(https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80)',
@@ -335,10 +391,9 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section id="faq" className="relative z-10 px-6 py-20 md:px-12 md:py-28">
+      <section id="faq" data-section-faq className="relative z-10 px-6 py-20 md:px-12 md:py-28">
         <div className="mx-auto max-w-3xl">
-          <div className="mb-12 text-center">
+          <div data-section-head className="mb-12 text-center">
             <p className="text-xs uppercase tracking-[0.3em] text-text-muted">FAQ</p>
             <h2 className="mt-3 font-heading text-4xl text-text md:text-5xl">
               Perguntas frequentes
@@ -349,6 +404,7 @@ export function LandingPage() {
             {FAQ.map((item) => (
               <details
                 key={item.question}
+                data-faq-item
                 className="group rounded-sm border border-border bg-surface/60 transition-colors open:border-primary/20 open:bg-surface"
               >
                 <summary className="cursor-pointer list-none px-6 py-5 font-heading text-lg text-text transition-colors marker:content-none hover:text-primary [&::-webkit-details-marker]:hidden">
@@ -368,26 +424,28 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="relative z-10 px-6 pb-20 md:px-12 md:pb-28">
+      <section data-section-cta className="relative z-10 px-6 pb-20 md:px-12 md:pb-28">
         <div className="mx-auto max-w-4xl rounded-sm border border-primary/20 bg-surface px-8 py-16 text-center md:px-16 md:py-20">
-          <h2 className="font-heading text-3xl text-text md:text-5xl">
+          <h2 data-reveal className="font-heading text-3xl text-text md:text-5xl">
             Pronto para guardar suas receitas?
           </h2>
-          <p className="mx-auto mt-4 max-w-lg text-sm text-text-muted">
+          <p data-reveal className="mx-auto mt-4 max-w-lg text-sm text-text-muted">
             Crie seu acervo pessoal hoje. Cada prato que você ama merece um lugar especial.
           </p>
           <Link
+            data-reveal
             to="/login"
-            className="mt-8 inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 font-body text-xs uppercase tracking-widest text-bg transition-all hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(240,192,64,0.3)]"
+            className="mt-8 inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 font-body text-xs uppercase tracking-widest text-bg transition-all hover:scale-[1.02] hover:bg-primary/90 hover:shadow-[0_0_40px_rgba(240,192,64,0.3)] active:scale-[0.98]"
           >
             Acessar Ricette
           </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-border px-6 py-12 md:px-12">
+      <footer
+        data-landing-footer
+        className="relative z-10 border-t border-border px-6 py-12 md:px-12"
+      >
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-8 md:flex-row">
           <div className="text-center md:text-left">
             <span className="font-heading text-2xl text-primary">Ricette</span>

@@ -1,5 +1,20 @@
 @import 'tailwindcss';
 @import './tokens.css';
+@import 'react-toastify/dist/ReactToastify.css';
+
+:root {
+  --toastify-color-dark: #111111;
+  --toastify-color-light: #111111;
+  --toastify-text-color-dark: #e8e4dc;
+  --toastify-text-color-light: #e8e4dc;
+  --toastify-color-success: #f0c040;
+  --toastify-color-error: #cc2200;
+  --toastify-color-info: #888880;
+  --toastify-color-warning: #f0c040;
+  --toastify-font-family: 'JetBrains Mono', ui-monospace, monospace;
+  --toastify-toast-width: 22rem;
+  --toastify-toast-bd-radius: 2px;
+}
 
 @theme {
   --color-bg: #0a0a0a;
@@ -113,4 +128,100 @@
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.ricette-toast {
+  border: 1px solid var(--color-border) !important;
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  font-size: 0.75rem !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
+}
+
+.ricette-toast .Toastify__toast-icon svg {
+  fill: currentColor;
+}
+
+.ricette-toast.Toastify__toast--success {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border)) !important;
+}
+
+.ricette-toast.Toastify__toast--success .Toastify__toast-icon {
+  color: var(--color-primary);
+}
+
+.ricette-toast.Toastify__toast--error {
+  border-color: color-mix(in srgb, var(--color-secondary) 35%, var(--color-border)) !important;
+}
+
+.ricette-toast.Toastify__toast--error .Toastify__toast-icon {
+  color: var(--color-secondary);
+}
+
+.ricette-toast-progress {
+  background: var(--color-primary) !important;
+}
+
+.ricette-toast.Toastify__toast--error .ricette-toast-progress {
+  background: var(--color-secondary) !important;
+}
+
+.ricette-toast--confirm {
+  min-width: min(22rem, calc(100vw - 2rem)) !important;
+  border-color: color-mix(in srgb, var(--color-secondary) 25%, var(--color-border)) !important;
+}
+
+.ricette-toast-confirm__title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: var(--color-text);
+}
+
+.ricette-toast-confirm__message {
+  margin: 0 0 1rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.ricette-toast-confirm__actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.ricette-toast-confirm__btn {
+  cursor: pointer;
+  border-radius: 2px;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.ricette-toast-confirm__btn--ghost {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.ricette-toast-confirm__btn--ghost:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+  color: var(--color-text);
+}
+
+.ricette-toast-confirm__btn--danger {
+  border: 1px solid color-mix(in srgb, var(--color-secondary) 50%, transparent);
+  background: color-mix(in srgb, var(--color-secondary) 15%, transparent);
+  color: var(--color-secondary);
+}
+
+.ricette-toast-confirm__btn--danger:hover {
+  background: color-mix(in srgb, var(--color-secondary) 25%, transparent);
 }
