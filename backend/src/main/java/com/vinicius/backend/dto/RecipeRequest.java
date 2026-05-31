@@ -34,4 +34,6 @@ public class RecipeRequest {
     @HttpUrl(message = "Informe uma URL de thumbnail válida.")
     @Size(max = 500, message = "URL da thumbnail deve ter no máximo 500 caracteres.")
     private String thumbnailUrl;
+
+    private Long categoryId;
 }

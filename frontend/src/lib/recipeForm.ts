@@ -5,17 +5,19 @@ export interface RecipeFormValues {
   steps: string[]
   videoUrl: string
   thumbnailUrl: string
+  categoryId: number | null
 }
 
 export type RecipeFormErrors = Partial<Record<keyof RecipeFormValues | 'ingredients' | 'steps', string>>
 
-export const emptyRecipeForm = (): RecipeFormValues => ({
+export const emptyRecipeForm = (categoryId: number | null = null): RecipeFormValues => ({
   title: '',
   description: '',
   ingredients: [''],
   steps: [''],
   videoUrl: '',
   thumbnailUrl: '',
+  categoryId,
 })
 
 export function parseListField(value: string | null | undefined): string[] {
@@ -37,6 +39,7 @@ export function recipeToFormValues(recipe: {
   steps: string[]
   videoUrl: string
   thumbnailUrl: string
+  categoryId?: number | null
 }): RecipeFormValues {
   return {
     title: recipe.title,
@@ -45,6 +48,7 @@ export function recipeToFormValues(recipe: {
     steps: recipe.steps.length > 0 ? [...recipe.steps] : [''],
     videoUrl: recipe.videoUrl ?? '',
     thumbnailUrl: recipe.thumbnailUrl ?? '',
+    categoryId: recipe.categoryId ?? null,
   }
 }
 
@@ -95,5 +99,6 @@ export function formValuesToPayload(values: RecipeFormValues) {
     preparationSteps: serializeListField(values.steps),
     videoUrl: values.videoUrl.trim(),
     thumbnailUrl: values.thumbnailUrl.trim(),
+    categoryId: values.categoryId,
   }
 }

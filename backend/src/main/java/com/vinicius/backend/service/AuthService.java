@@ -1,31 +1,35 @@
 package com.vinicius.backend.service;
 
+import com.vinicius.backend.config.AdminProperties;
 import com.vinicius.backend.dto.LoginRequest;
 import com.vinicius.backend.dto.TokenResponse;
 import com.vinicius.backend.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
-    @Value("${app.admin.email}")
-    private String adminEmail;
-
-    @Value("${app.admin.password}")
-    private String adminPassword;
-
+    private final AdminProperties adminProperties;
     private final JwtUtil jwtUtil;
 
     public TokenResponse login(LoginRequest request) {
-        if (!adminEmail.equals(request.getEmail()) || !adminPassword.equals(request.getPassword())) {
+        String email = request.getEmail() != null ? request.getEmail().trim() : "";
+        String password = request.getPassword() != null ? request.getPassword().trim() : "";
+
+        boolean emailMatch = adminProperties.getEmail().equalsIgnoreCase(email);
+        boolean passwordMatch = adminProperties.getPassword().equals(password);
+
+        if (!emailMatch || !passwordMatch) {
+            log.warn("Falha de login para e-mail: {} (verifique app.admin.* no perfil ativo)", email);
             throw new BadCredentialsException("Credenciais inválidas");
         }
 
-        String token = jwtUtil.generateToken(adminEmail);
+        String token = jwtUtil.generateToken(adminProperties.getEmail());
         return new TokenResponse(token);
     }
 }

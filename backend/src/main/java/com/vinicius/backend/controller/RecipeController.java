@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,9 +30,10 @@ public class RecipeController {
 
     @GetMapping
     public ResponseEntity<Page<RecipeResponse>> findAll(
+            @RequestParam(required = false) Long categoryId,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
-        return ResponseEntity.ok(recipeService.findAll(pageable));
+        return ResponseEntity.ok(recipeService.findAll(categoryId, pageable));
     }
 
     @GetMapping("/{id}")

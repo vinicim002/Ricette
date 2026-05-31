@@ -1,5 +1,6 @@
 package com.vinicius.backend.dto;
 
+import com.vinicius.backend.entity.Category;
 import com.vinicius.backend.entity.Recipe;
 
 import java.util.Arrays;
@@ -18,10 +19,12 @@ public final class RecipeMapper {
         normalized.setPreparationSteps(normalizeMultiline(request.getPreparationSteps()));
         normalized.setVideoUrl(trimToEmpty(request.getVideoUrl()));
         normalized.setThumbnailUrl(trimToEmpty(request.getThumbnailUrl()));
+        normalized.setCategoryId(request.getCategoryId());
         return normalized;
     }
 
     public static RecipeResponse toResponse(Recipe recipe) {
+        Category category = recipe.getCategory();
         return RecipeResponse.builder()
                 .id(recipe.getId())
                 .title(recipe.getTitle())
@@ -30,12 +33,15 @@ public final class RecipeMapper {
                 .preparationSteps(emptyIfNull(recipe.getPreparationSteps()))
                 .videoUrl(emptyIfNull(recipe.getVideoUrl()))
                 .thumbnailUrl(emptyIfNull(recipe.getThumbnailUrl()))
+                .categoryId(category != null ? category.getId() : null)
+                .categoryName(category != null ? category.getName() : null)
+                .categoryPathSlug(category != null ? category.getPathSlug() : null)
                 .createdAt(recipe.getCreatedAt())
                 .updatedAt(recipe.getUpdatedAt())
                 .build();
     }
 
-    public static Recipe toEntity(RecipeRequest request) {
+    public static Recipe toEntity(RecipeRequest request, Category category) {
         return Recipe.builder()
                 .title(request.getTitle())
                 .description(emptyToNull(request.getDescription()))
@@ -43,16 +49,18 @@ public final class RecipeMapper {
                 .preparationSteps(request.getPreparationSteps())
                 .videoUrl(emptyToNull(request.getVideoUrl()))
                 .thumbnailUrl(emptyToNull(request.getThumbnailUrl()))
+                .category(category)
                 .build();
     }
 
-    public static void applyToEntity(Recipe recipe, RecipeRequest request) {
+    public static void applyToEntity(Recipe recipe, RecipeRequest request, Category category) {
         recipe.setTitle(request.getTitle());
         recipe.setDescription(emptyToNull(request.getDescription()));
         recipe.setIngredients(request.getIngredients());
         recipe.setPreparationSteps(request.getPreparationSteps());
         recipe.setVideoUrl(emptyToNull(request.getVideoUrl()));
         recipe.setThumbnailUrl(emptyToNull(request.getThumbnailUrl()));
+        recipe.setCategory(category);
     }
 
     private static String normalizeMultiline(String value) {

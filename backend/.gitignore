@@ -1,5 +1,11 @@
 HELP.md
 target/
+
+# Segredos locais / produção
+.env
+.env.*
+!.env.prod.example
+application-local.properties
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -32,4 +38,8 @@ build/
 ### VS Code ###
 .vscode/
 
+# Application properties
+application-dev.properties
+application-prod.properties
+application-dev.yml
 

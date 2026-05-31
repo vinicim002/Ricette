@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { SHOWCASE_ITEMS } from '../../mocks/showcaseRecipes'
 import { useLandingGsap } from './useLandingGsap'
 
 const FEATURES = [
@@ -44,27 +45,6 @@ const STEPS = [
     number: '03',
     title: 'Reviva quando quiser',
     description: 'Abra a receita, aperte play e cozinhe de novo — como se estivesse ao lado do chef.',
-  },
-]
-
-const SHOWCASE = [
-  {
-    id: 1,
-    title: 'Risotto alla Milanese',
-    tag: 'Primo',
-    image: 'https://images.unsplash.com/photo-1476124366831-5abc798835d9?w=600&q=80',
-  },
-  {
-    id: 2,
-    title: 'Pasta al Pomodoro',
-    tag: 'Classico',
-    image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=600&q=80',
-  },
-  {
-    id: 3,
-    title: 'Tiramisù Classico',
-    tag: 'Dolce',
-    image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&q=80',
   },
 ]
 
@@ -168,21 +148,12 @@ export function LandingPage() {
           minimalista e sempre à mão. Do risotto da nonna ao experimento de ontem à noite.
         </p>
 
-        <div
-          data-hero-item
-          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
-        >
+        <div data-hero-item className="mt-10 flex justify-center">
           <Link
             to="/login"
             className="inline-flex items-center justify-center rounded-sm bg-primary px-8 py-3 font-body text-xs uppercase tracking-widest text-bg transition-all hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-[0_0_32px_rgba(240,192,64,0.25)] active:scale-[0.98]"
           >
             Começar agora
-          </Link>
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center justify-center rounded-sm border border-border px-8 py-3 font-body text-xs uppercase tracking-widest text-text-muted transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:text-primary active:scale-[0.98]"
-          >
-            Ver demonstração
           </Link>
         </div>
 
@@ -295,31 +266,28 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section data-section-showcase className="relative z-10 px-6 py-20 md:px-12 md:py-28">
+      <section
+        id="exemplos"
+        data-section-showcase
+        className="relative z-10 px-6 py-20 md:px-12 md:py-28"
+      >
         <div className="mx-auto max-w-6xl">
-          <div
-            data-section-head
-            className="mb-14 flex flex-col items-start justify-between gap-6 md:mb-16 md:flex-row md:items-end"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-text-muted">Acervo</p>
-              <h2 className="mt-3 font-heading text-4xl text-text md:text-5xl">
-                Suas receitas, em destaque
-              </h2>
-            </div>
-            <Link
-              to="/dashboard"
-              className="text-xs uppercase tracking-widest text-primary transition-opacity hover:opacity-80"
-            >
-              Ver todas →
-            </Link>
+          <div data-section-head className="mb-14 text-center md:mb-16">
+            <p className="text-xs uppercase tracking-[0.3em] text-text-muted">Exemplos</p>
+            <h2 className="mt-3 font-heading text-4xl text-text md:text-5xl">
+              Veja como uma receita fica salva
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-sm text-text-muted">
+              Amostras ilustrativas para você explorar o layout — não são receitas de usuários
+              reais. Clique para visualizar.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-            {SHOWCASE.map((item) => (
+            {SHOWCASE_ITEMS.map((item) => (
               <div key={item.id} data-showcase-card>
                 <Link
-                  to={`/recipes/${item.id}`}
+                  to={`/exemplo/${item.id}`}
                   className="group block overflow-hidden rounded-sm border border-border bg-surface transition-shadow duration-300 hover:border-primary/25 hover:shadow-[0_0_40px_rgba(240,192,64,0.06)]"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">

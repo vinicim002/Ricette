@@ -20,11 +20,14 @@ const USE_API = import.meta.env.VITE_USE_API === 'true'
 
 interface UseRecipeFormOptions {
   recipeId?: number
+  initialCategoryId?: number | null
 }
 
-export function useRecipeForm({ recipeId }: UseRecipeFormOptions = {}) {
+export function useRecipeForm({ recipeId, initialCategoryId }: UseRecipeFormOptions = {}) {
   const isEdit = recipeId != null && recipeId > 0
-  const [values, setValues] = useState<RecipeFormValues>(emptyRecipeForm)
+  const [values, setValues] = useState<RecipeFormValues>(() =>
+    emptyRecipeForm(initialCategoryId ?? null),
+  )
   const [errors, setErrors] = useState<RecipeFormErrors>({})
   const [loading, setLoading] = useState(isEdit)
   const [submitting, setSubmitting] = useState(false)

@@ -2,12 +2,15 @@ package com.vinicius.backend.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -18,41 +21,52 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "recipes")
+@Table(name = "categories")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Recipe {
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, length = 255)
-    private String title;
+    private String name;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "TEXT")
-    private String ingredients;
+    /** Slug do segmento (único entre irmãos). */
+    @Column(nullable = false, length = 255)
+    private String slug;
 
-    @Column(columnDefinition = "TEXT")
-    private String preparationSteps;
-
-    @Column(length = 500)
-    private String videoUrl;
-
-    @Column(length = 500)
-    private String thumbnailUrl;
+    /** Caminho completo para URL: doces/bolos/chocolate */
+    @Column(nullable = false, unique = true, length = 500)
+    private String pathSlug;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @JoinColumn(name = "parent_id")
+    private Category parent;
+
+    @OneToMany(mappedBy = "parent")
+    @Builder.Default
+    private List<Category> children = new ArrayList<>();
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer sortOrder = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private CategoryStatus status = CategoryStatus.ACTIVE;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

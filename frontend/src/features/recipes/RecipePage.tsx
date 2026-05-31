@@ -11,31 +11,40 @@ function formatDate(dateStr: string): string {
   })
 }
 
-export function RecipePage() {
+interface RecipePageProps {
+  /** Visualização pública de exemplo (landing), sem editar/excluir. */
+  variant?: 'app' | 'demo'
+}
+
+export function RecipePage({ variant = 'app' }: RecipePageProps) {
+  const isDemo = variant === 'demo'
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const recipeId = Number(id)
-  const { recipe, loading, error, refetch } = useRecipe(recipeId)
+  const { recipe, loading, error, refetch } = useRecipe(recipeId, { showcaseOnly: isDemo })
 
   if (!id || Number.isNaN(recipeId)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-text-muted">Receita inválida.</p>
+        <p className="text-text-muted">{isDemo ? 'Exemplo inválido.' : 'Receita inválida.'}</p>
       </div>
     )
   }
+
+  const backHref = isDemo ? '/#exemplos' : '/dashboard'
+  const backLabel = isDemo ? '← Voltar aos exemplos' : '← Dashboard'
 
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 md:px-8">
           <Link
-            to="/dashboard"
+            to={backHref}
             className="text-xs uppercase tracking-widest text-text-muted transition-colors hover:text-primary"
           >
-            ← Dashboard
+            {backLabel}
           </Link>
-          {recipe && (
+          {!isDemo && recipe && (
             <Link
               to={`/recipes/${recipe.id}/edit`}
               className="text-xs uppercase tracking-widest text-primary transition-opacity hover:opacity-80"
@@ -47,6 +56,17 @@ export function RecipePage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8 md:px-8 md:py-12">
+        {isDemo && (
+          <div className="animate-fade-in mb-8 rounded-sm border border-primary/25 bg-primary/10 px-4 py-3 text-center text-sm text-text-muted">
+            <span className="text-primary">Demonstração</span> — assim ficam suas receitas salvas no
+            Ricette.{' '}
+            <Link to="/login" className="text-primary underline-offset-2 hover:underline">
+              Entrar
+            </Link>{' '}
+            para criar o seu acervo.
+          </div>
+        )}
+
         {loading ? (
           <RecipePageSkeleton />
         ) : error ? (
@@ -56,7 +76,7 @@ export function RecipePage() {
               <Button variant="ghost" onClick={refetch}>
                 Tentar novamente
               </Button>
-              <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+              <Button variant="ghost" onClick={() => navigate(isDemo ? '/' : '/dashboard')}>
                 Voltar
               </Button>
             </div>
@@ -137,6 +157,21 @@ export function RecipePage() {
                 )}
               </section>
             </div>
+
+            {isDemo && (
+              <div className="mt-16 rounded-sm border border-border bg-surface/60 px-6 py-8 text-center">
+                <p className="font-heading text-2xl text-text">Gostou do formato?</p>
+                <p className="mt-2 text-sm text-text-muted">
+                  Crie seu acervo pessoal com vídeos, ingredientes e passo a passo.
+                </p>
+                <Link
+                  to="/login"
+                  className="mt-6 inline-flex items-center justify-center rounded-sm bg-primary px-8 py-3 font-body text-xs uppercase tracking-widest text-bg transition-all hover:bg-primary/90"
+                >
+                  Começar agora
+                </Link>
+              </div>
+            )}
           </article>
         ) : null}
       </main>

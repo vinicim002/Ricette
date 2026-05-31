@@ -27,7 +27,11 @@ export function toastInfo(message: string, options?: ToastOptions) {
 
 export function toastFromError(error: unknown, fallback = 'Algo deu errado. Tente novamente.') {
   if (error instanceof ApiError) {
-    toastError(error.message)
+    toastError(error.message || fallback)
+    return
+  }
+  if (error instanceof TypeError) {
+    toastError('Falha de conexão com o servidor. Confira se o backend está ativo.')
     return
   }
   if (error instanceof Error && error.message) {

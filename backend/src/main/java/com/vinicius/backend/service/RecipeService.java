@@ -3,8 +3,10 @@ package com.vinicius.backend.service;
 import com.vinicius.backend.dto.RecipeMapper;
 import com.vinicius.backend.dto.RecipeRequest;
 import com.vinicius.backend.dto.RecipeResponse;
+import com.vinicius.backend.entity.Category;
 import com.vinicius.backend.entity.Recipe;
 import com.vinicius.backend.exception.ResourceNotFoundException;
+import com.vinicius.backend.repository.CategoryRepository;
 import com.vinicius.backend.repository.RecipeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,10 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
-    public Page<RecipeResponse> findAll(Pageable pageable) {
-        return recipeRepository.findAll(pageable).map(RecipeMapper::toResponse);
+    public Page<RecipeResponse> findAll(Long categoryId, Pageable pageable) {
+        Page<Recipe> page = categoryId == null
+                ? recipeRepository.findAll(pageable)
+                : recipeRepository.findByCategoryId(categoryId, pageable);
+        return page.map(RecipeMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
@@ -33,7 +39,8 @@ public class RecipeService {
     @Transactional
     public RecipeResponse create(RecipeRequest request) {
         RecipeRequest normalized = RecipeMapper.normalize(request);
-        Recipe saved = recipeRepository.save(RecipeMapper.toEntity(normalized));
+        Category category = resolveCategory(normalized.getCategoryId());
+        Recipe saved = recipeRepository.save(RecipeMapper.toEntity(normalized, category));
         return RecipeMapper.toResponse(saved);
     }
 
@@ -43,7 +50,8 @@ public class RecipeService {
                 .orElseThrow(() -> new ResourceNotFoundException("Receita não encontrada."));
 
         RecipeRequest normalized = RecipeMapper.normalize(request);
-        RecipeMapper.applyToEntity(recipe, normalized);
+        Category category = resolveCategory(normalized.getCategoryId());
+        RecipeMapper.applyToEntity(recipe, normalized, category);
 
         Recipe updated = recipeRepository.save(recipe);
         return RecipeMapper.toResponse(updated);
@@ -55,5 +63,13 @@ public class RecipeService {
             throw new ResourceNotFoundException("Receita não encontrada.");
         }
         recipeRepository.deleteById(id);
+    }
+
+    private Category resolveCategory(Long categoryId) {
+        if (categoryId == null) {
+            return null;
+        }
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
     }
 }

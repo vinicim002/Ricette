@@ -19,6 +19,9 @@ public class RecipeResponse {
     private String preparationSteps;
     private String videoUrl;
     private String thumbnailUrl;
+    private Long categoryId;
+    private String categoryName;
+    private String categoryPathSlug;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

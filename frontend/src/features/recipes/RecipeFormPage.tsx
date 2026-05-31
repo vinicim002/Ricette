@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Skeleton } from '../../components/ui/Skeleton'
@@ -7,17 +7,25 @@ import { Textarea } from '../../components/ui/Textarea'
 import { useRecipeForm } from '../../hooks/useRecipeForm'
 import { toastFromError, toastSuccess } from '../../lib/toast'
 import type { RecipeFormValues } from '../../lib/recipeForm'
+import { CategorySelect } from '../categories/CategorySelect'
 import { DynamicStringList } from './DynamicStringList'
 
 export function RecipeFormPage() {
   const { id } = useParams<{ id: string }>()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const isEditRoute = id != null && id !== 'new'
   const recipeId = isEditRoute ? Number(id) : undefined
   const isInvalidEditId = isEditRoute && Number.isNaN(recipeId!)
+  const queryCategoryId = searchParams.get('categoryId')
+  const initialCategoryId =
+    queryCategoryId && !Number.isNaN(Number(queryCategoryId)) ? Number(queryCategoryId) : null
 
   const { values, setValues, errors, loading, submitting, loadError, isEdit, submit } =
-    useRecipeForm({ recipeId: isInvalidEditId ? undefined : recipeId })
+    useRecipeForm({
+      recipeId: isInvalidEditId ? undefined : recipeId,
+      initialCategoryId: isEditRoute ? undefined : initialCategoryId,
+    })
 
   const [videoPreview, setVideoPreview] = useState<string | null>(null)
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
@@ -144,6 +152,11 @@ export function RecipeFormPage() {
                 value={values.description}
                 onChange={(e) => patchValues({ description: e.target.value })}
                 placeholder="Conte a história do prato, dicas e contexto..."
+              />
+
+              <CategorySelect
+                value={values.categoryId}
+                onChange={(categoryId) => patchValues({ categoryId })}
               />
             </section>
 

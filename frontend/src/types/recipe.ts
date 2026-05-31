@@ -6,6 +6,9 @@ export interface Recipe {
   steps: string[]
   videoUrl: string
   thumbnailUrl: string
+  categoryId?: number | null
+  categoryName?: string | null
+  categoryPathSlug?: string | null
   createdAt: string
 }
 
@@ -14,6 +17,7 @@ export interface RecipeSummary {
   title: string
   thumbnailUrl: string
   createdAt: string
+  categoryId?: number | null
 }
 
 export interface PaginatedResponse<T> {

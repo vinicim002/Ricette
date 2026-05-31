@@ -1,7 +1,26 @@
+import type {
+  BreadcrumbItem,
+  Category,
+  CategoryMovePayload,
+  CategoryPayload,
+  CategoryReorderPayload,
+} from '../types/category'
 import type { PaginatedResponse, Recipe, RecipeSummary } from '../types/recipe'
 
-const API_BASE = import.meta.env.VITE_API_URL ?? '/api'
 const TOKEN_KEY = 'ricette_token'
+
+/** Em dev use `/api` (proxy Vite). URL absoluta só se VITE_API_URL estiver definida. */
+function resolveApiBase(): string {
+  const configured = import.meta.env.VITE_API_URL?.trim()
+  if (!configured) return '/api'
+  const base = configured.replace(/\/$/, '')
+  if (base.endsWith('/api')) return base
+  return `${base}/api`
+}
+
+const API_BASE = resolveApiBase()
+
+export const AUTH_LOGOUT_EVENT = 'ricette:auth-logout'
 
 export class ApiError extends Error {
   status: number
@@ -51,11 +70,19 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     resolvedBody = JSON.stringify(body)
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...rest,
-    headers,
-    body: resolvedBody,
-  })
+  let response: Response
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      ...rest,
+      headers,
+      body: resolvedBody,
+    })
+  } catch {
+    throw new ApiError(
+      'Não foi possível conectar ao servidor. Verifique se o backend está rodando em http://localhost:8080.',
+      0,
+    )
+  }
 
   if (!response.ok) {
     let message = 'Erro inesperado. Tente novamente.'
@@ -65,6 +92,12 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     } catch {
       message = response.statusText || message
     }
+
+    if (response.status === 401 && auth) {
+      clearToken()
+      window.dispatchEvent(new Event(AUTH_LOGOUT_EVENT))
+    }
+
     throw new ApiError(message, response.status)
   }
 
@@ -88,17 +121,42 @@ export const api = {
       body: { email, password },
     }),
 
-  getRecipes: (params?: { page?: number; size?: number; search?: string }) => {
+  getRecipes: (params?: { page?: number; size?: number; categoryId?: number }) => {
     const searchParams = new URLSearchParams()
     if (params?.page != null) searchParams.set('page', String(params.page))
     if (params?.size != null) searchParams.set('size', String(params.size))
-    if (params?.search) searchParams.set('search', params.search)
+    if (params?.categoryId != null) searchParams.set('categoryId', String(params.categoryId))
 
     const query = searchParams.toString()
-    return request<PaginatedResponse<RecipeSummary>>(
+    return request<PaginatedResponse<RecipeApiDto>>(
       `/recipes${query ? `?${query}` : ''}`,
     )
   },
+
+  getCategoryTree: () => request<Category[]>('/categories/tree'),
+
+  getCategory: (id: number) => request<Category>(`/categories/${id}`),
+
+  getCategoryByPath: (pathSlug: string) =>
+    request<Category>(`/categories/path/${pathSlug}`),
+
+  getCategoryBreadcrumb: (id: number) =>
+    request<BreadcrumbItem[]>(`/categories/${id}/breadcrumb`),
+
+  createCategory: (body: CategoryPayload) =>
+    request<Category>('/categories', { method: 'POST', body: { ...body } }),
+
+  updateCategory: (id: number, body: CategoryPayload) =>
+    request<Category>(`/categories/${id}`, { method: 'PUT', body: { ...body } }),
+
+  moveCategory: (id: number, body: CategoryMovePayload) =>
+    request<Category>(`/categories/${id}/move`, { method: 'PUT', body: { ...body } }),
+
+  reorderCategories: (body: CategoryReorderPayload) =>
+    request<void>('/categories/reorder', { method: 'PUT', body: { ...body } }),
+
+  deleteCategory: (id: number) =>
+    request<void>(`/categories/${id}`, { method: 'DELETE' }),
 
   getRecipe: (id: number) => request<RecipeApiDto>(`/recipes/${id}`),
 
@@ -119,6 +177,7 @@ export interface RecipePayload {
   preparationSteps: string
   videoUrl: string
   thumbnailUrl: string
+  categoryId?: number | null
 }
 
 interface RecipeApiDto {
@@ -129,8 +188,21 @@ interface RecipeApiDto {
   preparationSteps: string
   videoUrl: string
   thumbnailUrl: string
+  categoryId?: number | null
+  categoryName?: string | null
+  categoryPathSlug?: string | null
   createdAt: string
   updatedAt?: string
+}
+
+export function mapRecipeSummaryFromApi(dto: RecipeApiDto): RecipeSummary {
+  return {
+    id: dto.id,
+    title: dto.title,
+    thumbnailUrl: dto.thumbnailUrl ?? '',
+    createdAt: dto.createdAt,
+    categoryId: dto.categoryId ?? null,
+  }
 }
 
 export function mapRecipeFromApi(dto: RecipeApiDto): Recipe {
@@ -148,6 +220,9 @@ export function mapRecipeFromApi(dto: RecipeApiDto): Recipe {
     steps: split(dto.preparationSteps),
     videoUrl: dto.videoUrl ?? '',
     thumbnailUrl: dto.thumbnailUrl ?? '',
+    categoryId: dto.categoryId ?? null,
+    categoryName: dto.categoryName ?? null,
+    categoryPathSlug: dto.categoryPathSlug ?? null,
     createdAt: dto.createdAt,
   }
 }
