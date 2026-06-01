@@ -65,7 +65,7 @@ public class CategoryController {
     @PutMapping("/{id}/move")
     public ResponseEntity<CategoryResponse> move(
             @PathVariable Long id,
-            @RequestBody CategoryMoveRequest request) {
+            @Valid @RequestBody CategoryMoveRequest request) {
         return ResponseEntity.ok(categoryService.move(id, request));
     }
 

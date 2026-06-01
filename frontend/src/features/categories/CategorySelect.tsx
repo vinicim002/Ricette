@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { flattenCategories } from '../../lib/categoryUtils'
+import { toastError } from '../../lib/toast'
 import { api } from '../../services/api'
 import type { Category } from '../../types/category'
 
@@ -25,8 +26,13 @@ export function CategorySelect({ value, onChange, label = 'Categoria' }: Categor
       try {
         const tree: Category[] = await api.getCategoryTree()
         if (!cancelled) setOptions(flattenCategories(tree))
-      } catch {
-        if (!cancelled) setOptions([])
+      } catch (err) {
+        if (!cancelled) {
+          setOptions([])
+          toastError(
+            err instanceof Error ? err.message : 'Não foi possível carregar categorias.',
+          )
+        }
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -42,10 +48,14 @@ export function CategorySelect({ value, onChange, label = 'Categoria' }: Categor
 
   return (
     <div>
-      <label className="mb-1.5 block text-xs uppercase tracking-widest text-text-muted">
+      <label
+        htmlFor="recipe-category-select"
+        className="mb-1.5 block text-xs uppercase tracking-widest text-text-muted"
+      >
         {label}
       </label>
       <select
+        id="recipe-category-select"
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
         disabled={loading}

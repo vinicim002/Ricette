@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { LoginPage } from '../features/auth/LoginPage'
 import { PrivateRoute } from '../features/auth/PrivateRoute'
 import { LandingPage } from '../features/landing/LandingPage'
@@ -7,6 +7,7 @@ import { CategoriesAdminPage } from '../features/categories/CategoriesAdminPage'
 import { CategoryBrowsePage } from '../features/categories/CategoryBrowsePage'
 import { RecipeFormPage } from '../features/recipes/RecipeFormPage'
 import { RecipePage } from '../features/recipes/RecipePage'
+import { NotFoundPage } from '../features/errors/NotFoundPage'
 
 export function AppRouter() {
   return (
@@ -62,7 +63,7 @@ export function AppRouter() {
           </PrivateRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

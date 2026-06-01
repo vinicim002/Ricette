@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { AppHeader, AppHeaderLink } from '../../components/layout/AppHeader'
 import { Button } from '../../components/ui/Button'
 import { Fab } from '../../components/ui/Fab'
 import { Input } from '../../components/ui/Input'
@@ -45,28 +46,10 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-8 md:py-5">
-          <div>
-            <h1 className="font-heading text-2xl text-primary md:text-3xl">Ricette</h1>
-            <p className="text-xs text-text-muted">Minhas receitas</p>
-          </div>
-          <div className="flex gap-4">
-            <Link
-              to="/admin/categorias"
-              className="text-xs uppercase tracking-widest text-text-muted transition-colors hover:text-primary"
-            >
-              Gerenciar pastas
-            </Link>
-            <Link
-              to="/"
-              className="text-xs uppercase tracking-widest text-text-muted transition-colors hover:text-primary"
-            >
-              ← Início
-            </Link>
-          </div>
-        </div>
-      </header>
+      <AppHeader title="Ricette" subtitle="Minhas receitas">
+        <AppHeaderLink to="/admin/categorias">Gerenciar pastas</AppHeaderLink>
+        <AppHeaderLink to="/">← Início</AppHeaderLink>
+      </AppHeader>
 
       <main className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-12">
         <div className="animate-fade-in-up mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

@@ -18,6 +18,7 @@ public class CategoryRequest {
     @Size(max = 255, message = "Nome deve ter no máximo 255 caracteres.")
     private String name;
 
+    @Size(max = 5000, message = "Descrição deve ter no máximo 5000 caracteres.")
     private String description;
 
     private Long parentId;

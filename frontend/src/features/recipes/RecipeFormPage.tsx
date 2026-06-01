@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { AppHeader, AppHeaderLink } from '../../components/layout/AppHeader'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Skeleton } from '../../components/ui/Skeleton'
@@ -96,19 +97,9 @@ export function RecipeFormPage() {
 
   return (
     <div className="min-h-screen pb-28">
-      <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 md:px-8">
-          <Link
-            to="/dashboard"
-            className="text-xs uppercase tracking-widest text-text-muted transition-colors hover:text-primary"
-          >
-            ← Dashboard
-          </Link>
-          <span className="text-xs uppercase tracking-widest text-text-muted">
-            {isEdit ? 'Editar' : 'Nova receita'}
-          </span>
-        </div>
-      </header>
+      <AppHeader title={isEdit ? 'Editar receita' : 'Nova receita'}>
+        <AppHeaderLink to="/dashboard">← Dashboard</AppHeaderLink>
+      </AppHeader>
 
       <main className="mx-auto max-w-3xl px-4 py-8 md:px-8 md:py-12">
         {loading ? (
@@ -127,7 +118,7 @@ export function RecipeFormPage() {
           <form onSubmit={handleSubmit} className="animate-fade-in-up space-y-12" noValidate>
             <header>
               <p className="text-xs uppercase tracking-[0.3em] text-text-muted">
-                {isEdit ? 'Modifica la ricetta' : 'Nuova ricetta'}
+                {isEdit ? 'Editar receita' : 'Nova receita'}
               </p>
               <h1 className="mt-2 font-heading text-4xl text-text md:text-5xl">
                 {isEdit ? 'Editar receita' : 'Adicionar receita'}

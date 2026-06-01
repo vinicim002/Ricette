@@ -35,7 +35,12 @@ export function useLandingGsap(rootRef: RefObject<HTMLElement | null>) {
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia()
 
-      mm.add('(prefers-reduced-motion: reduce)', () => {})
+      mm.add('(prefers-reduced-motion: reduce)', () => {
+        const bg = root.querySelector<HTMLElement>('[data-landing-bg]')
+        if (bg) {
+          gsap.set(bg, { opacity: 1 })
+        }
+      })
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         const cleanups: Array<() => void> = []

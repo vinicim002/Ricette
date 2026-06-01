@@ -84,7 +84,7 @@ export function LandingPage() {
       >
         <div
           data-landing-bg
-          className="absolute left-0 right-0 top-[-12%] h-[125%] opacity-0"
+          className="absolute left-0 right-0 top-[-12%] h-[125%] opacity-0 motion-reduce:opacity-100"
           style={{
             background:
               'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(240,192,64,0.12) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 90% 80%, rgba(204,34,0,0.06) 0%, transparent 50%)',

@@ -19,12 +19,15 @@ public class RecipeRequest {
     @Size(max = 255, message = "Título deve ter no máximo 255 caracteres.")
     private String title;
 
+    @Size(max = 10000, message = "Descrição deve ter no máximo 10000 caracteres.")
     private String description;
 
     @MultilineNotBlank(message = "Adicione pelo menos um ingrediente.")
+    @Size(max = 50000, message = "Ingredientes devem ter no máximo 50000 caracteres.")
     private String ingredients;
 
     @MultilineNotBlank(message = "Adicione pelo menos um passo do preparo.")
+    @Size(max = 50000, message = "Modo de preparo deve ter no máximo 50000 caracteres.")
     private String preparationSteps;
 
     @HttpUrl(message = "Informe uma URL de vídeo válida (http ou https).")

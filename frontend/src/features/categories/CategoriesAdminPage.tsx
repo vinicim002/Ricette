@@ -1,10 +1,12 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { AppHeader, AppHeaderLink } from '../../components/layout/AppHeader'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { useCategoryTree } from '../../hooks/useCategories'
-import { flattenCategories } from '../../lib/categoryUtils'
+import { flattenCategoriesForParentSelect } from '../../lib/categoryUtils'
+import { toastError } from '../../lib/toast'
 import { toastConfirm } from '../../lib/toast'
 import { toastFromError, toastSuccess } from '../../lib/toast'
 import type { Category, CategoryStatus } from '../../types/category'
@@ -25,7 +27,10 @@ export function CategoriesAdminPage() {
   const [parentId, setParentId] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
 
-  const flatOptions = flattenCategories(tree)
+  const parentSelectOptions = useMemo(
+    () => flattenCategoriesForParentSelect(tree, selected?.id ?? null),
+    [tree, selected?.id],
+  )
 
   function openCreateRoot() {
     setFormMode('create-root')
@@ -62,7 +67,7 @@ export function CategoriesAdminPage() {
     if (action === 'delete') {
       void (async () => {
         const ok = await toastConfirm({
-          message: `Excluir "${category.name}" e todas as referências?`,
+          message: `Excluir "${category.name}"? Mova subcategorias e receitas antes de confirmar.`,
         })
         if (!ok) return
         try {
@@ -77,7 +82,10 @@ export function CategoriesAdminPage() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    if (!name.trim()) return
+    if (!name.trim()) {
+      toastError('Informe o nome da categoria.')
+      return
+    }
 
     setSaving(true)
     try {
@@ -110,28 +118,10 @@ export function CategoriesAdminPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
-          <div>
-            <h1 className="font-heading text-2xl text-primary md:text-3xl">Categorias</h1>
-            <p className="text-xs text-text-muted">Gerenciamento hierárquico</p>
-          </div>
-          <div className="flex gap-4">
-            <Link
-              to="/dashboard"
-              className="text-xs uppercase tracking-widest text-text-muted hover:text-primary"
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/categorias"
-              className="text-xs uppercase tracking-widest text-text-muted hover:text-primary"
-            >
-              Navegar
-            </Link>
-          </div>
-        </div>
-      </header>
+      <AppHeader title="Categorias" subtitle="Gerenciamento hierárquico">
+        <AppHeaderLink to="/dashboard">Dashboard</AppHeaderLink>
+        <AppHeaderLink to="/categorias">Navegar</AppHeaderLink>
+      </AppHeader>
 
       <main className="mx-auto grid max-w-6xl gap-8 px-4 py-8 md:grid-cols-[1fr_320px] md:px-8">
         <section className="min-w-0 rounded-sm border border-border bg-surface/40 p-4 md:p-6">
@@ -186,9 +176,7 @@ export function CategoriesAdminPage() {
                     className="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm text-text"
                   >
                     <option value="">— Raiz —</option>
-                    {flatOptions
-                      .filter((opt) => opt.id !== selected?.id)
-                      .map((opt) => (
+                    {parentSelectOptions.map((opt) => (
                         <option key={opt.id} value={opt.id}>
                           {opt.label}
                         </option>

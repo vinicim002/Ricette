@@ -8,17 +8,20 @@ import { toastFromError, toastSuccess } from '../../lib/toast'
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { login, logout } = useAuth()
+  const { login, logout, isAuthenticated } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
 
   const from = (location.state as { from?: string } | null)?.from ?? '/dashboard'
 
-  // Remove JWT antigo (ex.: credenciais trocadas no backend) para não redirecionar com sessão inválida
   useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true })
+      return
+    }
     logout()
-  }, [logout])
+  }, [isAuthenticated, logout, navigate, from])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -46,14 +49,13 @@ export function LoginPage() {
 
         <form
           onSubmit={handleSubmit}
-          autoComplete="off"
           className="space-y-5 rounded-sm border border-border bg-surface p-8"
         >
           <Input
             label="E-mail"
             type="email"
-            name="ricette-email"
-            autoComplete="off"
+            name="email"
+            autoComplete="username"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -63,8 +65,8 @@ export function LoginPage() {
           <Input
             label="Senha"
             type="password"
-            name="ricette-password"
-            autoComplete="new-password"
+            name="password"
+            autoComplete="current-password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}

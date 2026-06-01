@@ -1,5 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
+import { AppHeader, AppHeaderLink } from '../../components/layout/AppHeader'
 import { Button } from '../../components/ui/Button'
+import { toastFromError, toastSuccess } from '../../lib/toast'
 import { RecipeCardSkeleton } from '../../components/ui/Skeleton'
 import { useCategoryBrowse } from '../../hooks/useCategoryBrowse'
 import { useRecipes } from '../../hooks/useRecipes'
@@ -24,30 +26,13 @@ export function CategoryBrowsePage() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-8">
-          <div className="min-w-0">
-            <h1 className="truncate font-heading text-2xl text-primary md:text-3xl">{title}</h1>
-            {!isRoot && category?.description && (
-              <p className="mt-1 line-clamp-2 text-sm text-text-muted">{category.description}</p>
-            )}
-          </div>
-          <div className="flex shrink-0 gap-4">
-            <Link
-              to="/dashboard"
-              className="text-xs uppercase tracking-widest text-text-muted hover:text-primary"
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/admin/categorias"
-              className="text-xs uppercase tracking-widest text-text-muted hover:text-primary"
-            >
-              Gerenciar
-            </Link>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        title={title}
+        subtitle={!isRoot && category?.description ? category.description : undefined}
+      >
+        <AppHeaderLink to="/dashboard">Dashboard</AppHeaderLink>
+        <AppHeaderLink to="/admin/categorias">Gerenciar</AppHeaderLink>
+      </AppHeader>
 
       <main className="mx-auto max-w-7xl space-y-10 px-4 py-8 md:px-8">
         {!isRoot && breadcrumb.length > 0 && (
@@ -123,8 +108,13 @@ export function CategoryBrowsePage() {
                         key={recipe.id}
                         recipe={recipe}
                         onDelete={async (id) => {
-                          await deleteRecipe(id)
-                          refetchRecipes()
+                          try {
+                            await deleteRecipe(id)
+                            toastSuccess('Receita excluída.')
+                            refetchRecipes()
+                          } catch (err) {
+                            toastFromError(err, 'Erro ao excluir receita.')
+                          }
                         }}
                       />
                     ))}

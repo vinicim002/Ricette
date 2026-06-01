@@ -57,7 +57,7 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
         </div>
       </Link>
 
-      <div className="absolute right-3 top-3 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="absolute right-3 top-3 flex gap-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
         <Link
           to={`/recipes/${recipe.id}/edit`}
           aria-label={`Editar ${recipe.title}`}

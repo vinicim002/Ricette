@@ -31,6 +31,7 @@ export function Button({
     <button
       type="button"
       disabled={disabled || loading}
+      aria-busy={loading || undefined}
       className={`inline-flex items-center justify-center gap-2 rounded-sm px-5 py-2.5 font-body text-xs uppercase tracking-widest transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed ${variantClasses[variant]} ${className}`}
       {...props}
     >
@@ -38,6 +39,7 @@ export function Button({
         <span
           className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
           aria-hidden="true"
+          role="status"
         />
       )}
       {children}

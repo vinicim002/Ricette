@@ -93,7 +93,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       message = response.statusText || message
     }
 
-    if (response.status === 401 && auth) {
+    if ((response.status === 401 || response.status === 403) && auth) {
       clearToken()
       window.dispatchEvent(new Event(AUTH_LOGOUT_EVENT))
     }
@@ -168,6 +168,26 @@ export const api = {
 
   deleteRecipe: (id: number) =>
     request<void>(`/recipes/${id}`, { method: 'DELETE' }),
+}
+
+/** Busca todas as páginas de receitas (máx. 100 por página no backend). */
+export async function fetchAllRecipeSummaries(categoryId?: number): Promise<RecipeSummary[]> {
+  const all: RecipeSummary[] = []
+  let page = 0
+  const size = 100
+
+  while (true) {
+    const response = await api.getRecipes({ page, size, categoryId })
+    all.push(...response.content.map(mapRecipeSummaryFromApi))
+    const isLast =
+      response.last === true ||
+      response.totalPages === 0 ||
+      response.number >= response.totalPages - 1
+    if (isLast) break
+    page += 1
+  }
+
+  return all
 }
 
 export interface RecipePayload {

@@ -19,8 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -40,14 +42,14 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public CategoryResponse getById(Long id) {
         Category category = findCategory(id);
-        return toResponse(category, false, Map.of(category.getId(), recipeRepository.countByCategoryId(id)));
+        return toResponseWithSubtreeCount(category, false);
     }
 
     @Transactional(readOnly = true)
     public CategoryResponse getByPathSlug(String pathSlug) {
         Category category = categoryRepository.findByPathSlug(pathSlug)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
-        return toResponse(category, false, Map.of(category.getId(), recipeRepository.countByCategoryId(category.getId())));
+        return toResponseWithSubtreeCount(category, false);
     }
 
     @Transactional(readOnly = true)
@@ -96,11 +98,18 @@ public class CategoryService {
             throw new BadRequestException("Não é possível mover uma categoria para dentro de si mesma.");
         }
 
+        Long oldParentId = category.getParent() != null ? category.getParent().getId() : null;
+        Long newParentId = newParent != null ? newParent.getId() : null;
+        boolean parentChanged = !Objects.equals(oldParentId, newParentId);
+
         String segmentSlug = resolveUniqueSegmentSlug(request.getName(), newParent, category.getId());
         category.setName(request.getName().trim());
         category.setDescription(trimDescription(request.getDescription()));
         category.setSlug(segmentSlug);
         category.setParent(newParent);
+        if (parentChanged) {
+            category.setSortOrder(nextSortOrder(newParent));
+        }
         if (request.getStatus() != null) {
             category.setStatus(request.getStatus());
         }
@@ -109,7 +118,7 @@ public class CategoryService {
         Category saved = categoryRepository.save(category);
         refreshDescendantPaths(saved);
 
-        return toResponse(saved, false, Map.of(saved.getId(), recipeRepository.countByCategoryId(saved.getId())));
+        return toResponseWithSubtreeCount(saved, false);
     }
 
     @Transactional
@@ -125,6 +134,10 @@ public class CategoryService {
 
     @Transactional
     public void reorder(CategoryReorderRequest request) {
+        if (request.getParentId() != null && !categoryRepository.existsById(request.getParentId())) {
+            throw new ResourceNotFoundException("Categoria pai não encontrada.");
+        }
+
         List<Category> siblings = request.getParentId() == null
                 ? categoryRepository.findAllByParentIsNullOrderBySortOrderAscNameAsc()
                 : categoryRepository.findAllByParentIdOrderBySortOrderAscNameAsc(request.getParentId());
@@ -134,8 +147,16 @@ public class CategoryService {
             siblingIds.add(sibling.getId());
         }
 
+        List<Long> orderedIds = request.getOrderedIds();
+        if (orderedIds.size() != new LinkedHashSet<>(orderedIds).size()) {
+            throw new BadRequestException("IDs duplicados na ordenação.");
+        }
+        if (orderedIds.size() != siblings.size()) {
+            throw new BadRequestException("Informe todas as categorias do mesmo nível na ordenação.");
+        }
+
         int order = 0;
-        for (Long id : request.getOrderedIds()) {
+        for (Long id : orderedIds) {
             if (!siblingIds.contains(id)) {
                 throw new BadRequestException("Categoria não pertence ao mesmo nível.");
             }
@@ -299,6 +320,23 @@ public class CategoryService {
                     .build());
         }
         return result;
+    }
+
+    private CategoryResponse toResponseWithSubtreeCount(Category category, boolean withChildren) {
+        List<Category> all = categoryRepository.findAll();
+        Map<Long, Long> directCounts = buildRecipeCountMap();
+        long count = countSubtreeRecipes(category.getId(), directCounts, all);
+        return toResponse(category, withChildren, Map.of(category.getId(), count));
+    }
+
+    private long countSubtreeRecipes(Long categoryId, Map<Long, Long> directCounts, List<Category> all) {
+        long total = directCounts.getOrDefault(categoryId, 0L);
+        for (Category candidate : all) {
+            if (candidate.getParent() != null && categoryId.equals(candidate.getParent().getId())) {
+                total += countSubtreeRecipes(candidate.getId(), directCounts, all);
+            }
+        }
+        return total;
     }
 
     private CategoryResponse toResponse(Category category, boolean withChildren, Map<Long, Long> recipeCounts) {

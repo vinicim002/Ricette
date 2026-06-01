@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { toastError } from '../lib/toast'
 import { getShowcaseRecipe } from '../mocks/showcaseRecipes'
 import { getMockRecipe, getMockRecipes, mockDelay } from '../mocks/recipes'
-import { api, mapRecipeFromApi, mapRecipeSummaryFromApi } from '../services/api'
+import { api, fetchAllRecipeSummaries, mapRecipeFromApi } from '../services/api'
 import type { Recipe, RecipeSummary } from '../types/recipe'
 
 const USE_API = import.meta.env.VITE_USE_API === 'true'
@@ -39,12 +39,7 @@ export function useRecipes(options: UseRecipesOptions = {}): UseRecipesResult {
     setError(null)
     try {
       if (USE_API) {
-        const response = await api.getRecipes({
-          page: 0,
-          size: 100,
-          categoryId,
-        })
-        const summaries = response.content.map(mapRecipeSummaryFromApi)
+        const summaries = await fetchAllRecipeSummaries(categoryId)
         setRecipes(filterBySearch(summaries, search))
       } else {
         await mockDelay()

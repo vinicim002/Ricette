@@ -1,4 +1,5 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { AppHeader, AppHeaderLink } from '../../components/layout/AppHeader'
 import { Button } from '../../components/ui/Button'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { useRecipe } from '../../hooks/useRecipes'
@@ -36,24 +37,23 @@ export function RecipePage({ variant = 'app' }: RecipePageProps) {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 md:px-8">
-          <Link
-            to={backHref}
-            className="text-xs uppercase tracking-widest text-text-muted transition-colors hover:text-primary"
-          >
-            {backLabel}
-          </Link>
-          {!isDemo && recipe && (
+      {isDemo ? (
+        <header className="sticky top-0 z-30 border-b border-border bg-bg/90 backdrop-blur-md">
+          <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 md:px-8">
             <Link
-              to={`/recipes/${recipe.id}/edit`}
-              className="text-xs uppercase tracking-widest text-primary transition-opacity hover:opacity-80"
+              to={backHref}
+              className="text-xs uppercase tracking-widest text-text-muted transition-colors hover:text-primary"
             >
-              Editar
+              {backLabel}
             </Link>
-          )}
-        </div>
-      </header>
+          </div>
+        </header>
+      ) : (
+        <AppHeader title={recipe?.title ?? 'Receita'}>
+          <AppHeaderLink to={backHref}>{backLabel}</AppHeaderLink>
+          {recipe && <AppHeaderLink to={`/recipes/${recipe.id}/edit`}>Editar</AppHeaderLink>}
+        </AppHeader>
+      )}
 
       <main className="mx-auto max-w-4xl px-4 py-8 md:px-8 md:py-12">
         {isDemo && (

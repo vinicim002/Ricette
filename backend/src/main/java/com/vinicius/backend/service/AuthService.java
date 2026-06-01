@@ -25,7 +25,7 @@ public class AuthService {
         boolean passwordMatch = adminProperties.getPassword().equals(password);
 
         if (!emailMatch || !passwordMatch) {
-            log.warn("Falha de login para e-mail: {} (verifique app.admin.* no perfil ativo)", email);
+            log.warn("Tentativa de login inválida.");
             throw new BadCredentialsException("Credenciais inválidas");
         }
 
