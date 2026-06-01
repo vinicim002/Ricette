@@ -4,6 +4,7 @@ target/
 # Segredos locais / produção
 .env
 .env.*
+!.env.example
 !.env.prod.example
 application-local.properties
 .mvn/wrapper/maven-wrapper.jar
@@ -38,8 +39,9 @@ build/
 ### VS Code ###
 .vscode/
 
-# Application properties
-application-dev.properties
-application-prod.properties
-application-dev.yml
+# Application properties (overrides locais na raiz do módulo — não versionar)
+/application-dev.properties
+/application-dev.yml
+
+.env
 
