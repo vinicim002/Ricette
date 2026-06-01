@@ -6,16 +6,18 @@ Plano gratuito do Render: o serviço **dorme** após ~15 min sem tráfego (prime
 
 ## Opção A — Blueprint (recomendado)
 
-1. Faça **push** do repositório no GitHub.
+Checklist rápida: **[BLUEPRINT-RENDER-CHECKLIST.md](./BLUEPRINT-RENDER-CHECKLIST.md)**
+
+1. Faça **push** do repositório no GitHub (`render.yaml` na raiz).
 2. [dashboard.render.com](https://dashboard.render.com) → **New +** → **Blueprint**.
-3. Conecte o repo `Ricette` → Render lê `render.yaml` na raiz.
-4. Preencha os secrets solicitados:
+3. Conecte o repo `Ricette`.
+4. Preencha os **4 secrets** (não deixe `APP_CORS` vazio — use a URL da Vercel ou temporária `https://seu-app.vercel.app`):
    - `APP_ADMIN_EMAIL`
    - `APP_ADMIN_PASSWORD`
    - `APP_JWT_SECRET` (≥ 32 caracteres)
-   - `APP_CORS_ALLOWED_ORIGINS` → deixe vazio por agora; preencha após o deploy da Vercel
-5. **Apply** e aguarde Postgres + API subirem.
-6. Copie a URL da API (ex.: `https://ricette-api.onrender.com`).
+   - `APP_CORS_ALLOWED_ORIGINS`
+5. **Apply** — o Blueprint cria Postgres + API e injeta `DATABASE_URL` automaticamente.
+6. Teste: `https://SUA-URL.onrender.com/api/health` → `{"status":"UP"}`.
 
 ---
 

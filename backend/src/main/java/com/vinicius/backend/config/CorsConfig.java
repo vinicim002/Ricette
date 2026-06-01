@@ -1,5 +1,6 @@
 package com.vinicius.backend.config;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,14 @@ public class CorsConfig {
 
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
+
+    @PostConstruct
+    void validateAllowedOrigins() {
+        if (allowedOrigins == null || allowedOrigins.isBlank()) {
+            throw new IllegalStateException(
+                    "Defina APP_CORS_ALLOWED_ORIGINS com a URL do front (ex.: https://seu-app.vercel.app).");
+        }
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

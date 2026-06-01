@@ -21,25 +21,20 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
     private static final String HELP = """
             Banco de dados não configurado. No Render:
             1. Crie um PostgreSQL no mesmo projeto
-            2. No Web Service → Environment → Link Database (ou adicione DATABASE_URL)
-            3. Redeploy
-            Alternativa: defina SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME e SPRING_DATASOURCE_PASSWORD
+            2. No Web Service → Environment → Add from database / Link Database
+            3. Confirme a variável DATABASE_URL (postgres://...)
+            4. Redeploy
+            Alternativa: SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, SPRING_DATASOURCE_PASSWORD
             """;
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        if (!isProdProfile(environment)) {
-            return;
-        }
-
-        if (hasExplicitSpringDatasource(environment)) {
-            validateResolvedUrl(environment.getProperty("spring.datasource.url"));
-            return;
-        }
-
         Map<String, Object> props = resolveFromDatabaseUrl(environment);
         if (props == null) {
             props = resolveFromDiscreteVariables(environment);
+        }
+        if (props == null) {
+            props = resolveFromSpringDatasourceEnv(environment);
         }
 
         if (props != null) {
@@ -47,7 +42,9 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
             return;
         }
 
-        throw new IllegalStateException(HELP);
+        if (isProdProfile(environment)) {
+            throw new IllegalStateException(HELP);
+        }
     }
 
     private static boolean isProdProfile(ConfigurableEnvironment environment) {
@@ -56,21 +53,39 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
                 return true;
             }
         }
-        String profiles = environment.getProperty("spring.profiles.active");
+        String profiles = firstNonBlank(
+                getProperty(environment, "spring.profiles.active"),
+                getProperty(environment, "SPRING_PROFILES_ACTIVE")
+        );
         return profiles != null && profiles.contains("prod");
     }
 
-    private static boolean hasExplicitSpringDatasource(ConfigurableEnvironment environment) {
-        String url = environment.getProperty("SPRING_DATASOURCE_URL");
-        return url != null && !url.isBlank() && !url.contains("${");
+    private static Map<String, Object> resolveFromSpringDatasourceEnv(ConfigurableEnvironment environment) {
+        String url = getProperty(environment, "SPRING_DATASOURCE_URL");
+        String username = getProperty(environment, "SPRING_DATASOURCE_USERNAME");
+        String password = getProperty(environment, "SPRING_DATASOURCE_PASSWORD");
+
+        if (url == null || url.isBlank() || url.contains("${")) {
+            return null;
+        }
+
+        Map<String, Object> props = new HashMap<>();
+        props.put("spring.datasource.url", url);
+        if (username != null) {
+            props.put("spring.datasource.username", username);
+        }
+        if (password != null) {
+            props.put("spring.datasource.password", password);
+        }
+        return props;
     }
 
     private static Map<String, Object> resolveFromDatabaseUrl(ConfigurableEnvironment environment) {
         String databaseUrl = firstNonBlank(
-                environment.getProperty("DATABASE_URL"),
-                environment.getProperty("INTERNAL_DATABASE_URL")
+                getProperty(environment, "DATABASE_URL"),
+                getProperty(environment, "INTERNAL_DATABASE_URL")
         );
-        if (databaseUrl == null || !databaseUrl.startsWith("postgres")) {
+        if (databaseUrl == null || !isPostgresUrl(databaseUrl)) {
             return null;
         }
         return fromPostgresUrl(databaseUrl);
@@ -78,20 +93,20 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
 
     private static Map<String, Object> resolveFromDiscreteVariables(ConfigurableEnvironment environment) {
         String host = firstNonBlank(
-                environment.getProperty("DATABASE_HOST"),
-                environment.getProperty("PGHOST")
+                getProperty(environment, "DATABASE_HOST"),
+                getProperty(environment, "PGHOST")
         );
         String user = firstNonBlank(
-                environment.getProperty("DATABASE_USER"),
-                environment.getProperty("PGUSER")
+                getProperty(environment, "DATABASE_USER"),
+                getProperty(environment, "PGUSER")
         );
         String password = firstNonBlank(
-                environment.getProperty("DATABASE_PASSWORD"),
-                environment.getProperty("PGPASSWORD")
+                getProperty(environment, "DATABASE_PASSWORD"),
+                getProperty(environment, "PGPASSWORD")
         );
         String database = firstNonBlank(
-                environment.getProperty("DATABASE_NAME"),
-                environment.getProperty("PGDATABASE")
+                getProperty(environment, "DATABASE_NAME"),
+                getProperty(environment, "PGDATABASE")
         );
 
         if (host == null || user == null || password == null || database == null) {
@@ -99,8 +114,8 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
         }
 
         String port = firstNonBlank(
-                environment.getProperty("DATABASE_PORT"),
-                environment.getProperty("PGPORT")
+                getProperty(environment, "DATABASE_PORT"),
+                getProperty(environment, "PGPORT")
         );
         int portNumber = port != null ? Integer.parseInt(port) : 5432;
 
@@ -139,14 +154,27 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
             props.put("spring.datasource.password", password);
             return props;
         } catch (Exception ex) {
-            throw new IllegalStateException("Não foi possível interpretar DATABASE_URL.", ex);
+            throw new IllegalStateException("Não foi possível interpretar DATABASE_URL: " + maskUrl(databaseUrl), ex);
         }
     }
 
-    private static void validateResolvedUrl(String url) {
-        if (url == null || url.isBlank() || url.contains("${")) {
-            throw new IllegalStateException(HELP);
+    private static String maskUrl(String url) {
+        if (url == null || url.length() < 12) {
+            return "(url)";
         }
+        return url.substring(0, 12) + "...";
+    }
+
+    private static String getProperty(ConfigurableEnvironment environment, String key) {
+        String value = environment.getProperty(key);
+        if (value != null && !value.isBlank()) {
+            return value.trim();
+        }
+        value = System.getenv(key);
+        if (value != null && !value.isBlank()) {
+            return value.trim();
+        }
+        return null;
     }
 
     private static String firstNonBlank(String... values) {
@@ -156,6 +184,10 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
             }
         }
         return null;
+    }
+
+    private static boolean isPostgresUrl(String url) {
+        return url.startsWith("postgres://") || url.startsWith("postgresql://");
     }
 
     private static String decode(String value) {

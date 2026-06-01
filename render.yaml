@@ -1,5 +1,5 @@
 # Blueprint Render — https://render.com/docs/blueprint-spec
-# Dashboard: New → Blueprint → conecte o repositório e revise os secrets.
+# New → Blueprint → conecte o repositório GitHub (render.yaml na raiz do repo).
 
 databases:
   - name: ricette-db
@@ -13,6 +13,7 @@ services:
     runtime: docker
     rootDir: backend
     dockerfilePath: ./Dockerfile
+    dockerContext: .
     plan: free
     healthCheckPath: /api/health
     envVars:
@@ -20,15 +21,39 @@ services:
         value: prod
       - key: APP_JWT_EXPIRATION_MS
         value: "86400000"
+      # Preencha no assistente do Blueprint (sync: false = secret)
       - key: APP_ADMIN_EMAIL
         sync: false
       - key: APP_ADMIN_PASSWORD
         sync: false
       - key: APP_JWT_SECRET
         sync: false
+      # URL do front Vercel (https://... sem barra no final). Pode atualizar depois.
       - key: APP_CORS_ALLOWED_ORIGINS
         sync: false
+      # Postgres — connectionString = postgresql://user:pass@host:port/ricette
       - key: DATABASE_URL
         fromDatabase:
           name: ricette-db
           property: connectionString
+      # Fallback se DATABASE_URL falhar no parse
+      - key: DATABASE_HOST
+        fromDatabase:
+          name: ricette-db
+          property: host
+      - key: DATABASE_PORT
+        fromDatabase:
+          name: ricette-db
+          property: port
+      - key: DATABASE_USER
+        fromDatabase:
+          name: ricette-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: ricette-db
+          property: password
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: ricette-db
+          property: database
