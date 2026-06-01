@@ -34,6 +34,7 @@ Gerar JWT (PowerShell):
 - [ ] Deploy **Live** (verde)
 - [ ] `https://SUA-URL.onrender.com/api/health` → `{"status":"UP"}`
 - [ ] Logs sem `Failed to determine suitable jdbc url` nem `${PGHOST}`
+- [ ] Render → `ricette-api` → **Environment**: existe `DATABASE_URL` (ou `DATABASE_HOST` + `DATABASE_PASSWORD`)
 
 ## 5. Vercel
 
