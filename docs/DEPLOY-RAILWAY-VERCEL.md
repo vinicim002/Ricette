@@ -1,5 +1,7 @@
 # Deploy — Railway (API + Postgres) + Vercel (front)
 
+> **Sem plano no Railway?** Use [DEPLOY-RENDER-VERCEL.md](./DEPLOY-RENDER-VERCEL.md) (Render Free + Vercel).
+
 Ordem recomendada: **Postgres → Backend → Front → CORS**.
 
 ---
