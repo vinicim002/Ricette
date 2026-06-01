@@ -51,10 +51,12 @@ Plano gratuito do Render: o serviço **dorme** após ~15 min sem tráfego (prime
 | `APP_JWT_EXPIRATION_MS` | `86400000` |
 | `APP_CORS_ALLOWED_ORIGINS` | *(depois da Vercel)* |
 
-5. **Connections** (ou Environment → Link Database): vincule `ricette-db`  
-   → Render adiciona `DATABASE_URL` automaticamente.
+5. **Obrigatório — vincular o Postgres:** no Web Service → **Environment** → **Add from database** (ou **Connections → Link Database**) → escolha `ricette-db`.  
+   Isso injeta `DATABASE_URL` (e `DATABASE_HOST`, etc.). **Sem isso a API cai** com erro `${PGHOST}` na URL.
 
-6. **Create Web Service** → copie a URL pública.
+6. Confirme que existe a variável `DATABASE_URL` (valor começa com `postgres://`).
+
+7. **Create Web Service** → copie a URL pública.
 
 7. Teste: `https://SUA-API.onrender.com/api/health` → `{"status":"UP"}`
 
@@ -99,6 +101,19 @@ Salve (novo deploy automático).
 - [ ] Login no front funciona
 - [ ] Sem erro de CORS no console
 - [ ] Primeira visita após idle: aguardar cold start do Render Free
+
+---
+
+## Erro `${PGHOST}` na URL do banco
+
+Significa que o **PostgreSQL não está ligado** ao Web Service.
+
+1. Render → seu **Web Service** → **Environment**
+2. **Add from database** (ou Link Database) → selecione o Postgres
+3. Verifique se aparece `DATABASE_URL` (começa com `postgres://`)
+4. **Manual Deploy** / aguarde redeploy
+
+Faça **push** da correção mais recente do repositório (config de banco atualizada).
 
 ---
 
